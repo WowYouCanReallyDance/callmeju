@@ -3,6 +3,8 @@ name: build
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*.*.*-*'
   pull_request:
 
 jobs:
@@ -27,3 +29,22 @@ jobs:
           name: callmeju-armv7-linux-gnueabihf
           path: target/armv7-unknown-linux-gnueabihf/release/callmeju
           if-no-files-found: error
+
+  release:
+    needs: build-armv7
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: callmeju-armv7-linux-gnueabihf
+          path: ./artifact
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifact/callmeju
+          generate_release_notes: true
