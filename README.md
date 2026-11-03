@@ -62,22 +62,16 @@ cargo check
 cargo run -- --server http://127.0.0.1:8000
 ```
 
-### 设备交叉编译（容器化 + just，无需 zig）
-在 Ubuntu PC 上用 podman 构建（全程封闭在其 workspace 内）：
+### 设备交叉编译（GitHub Actions CI，容器化 + just，无需 zig）
 
-```sh
-# 1. 同步源码到构建机 workspace
-rsync -az --exclude target/ callmeju/ monica@192.168.1.11:/home/monica/development/tempspace/tempfiles/hackind1/callmeju/
+所有构建都在 CI 完成，无需本地工具链：
 
-# 2. 构建环境镜像（debian:stretch + GNU armhf 工具链 + rust + just）
-podman build -t callmeju-env -f Containerfile .
+- **push 到 `main` 或 PR**：自动交叉编译，产物在 Actions 的 Artifacts 里下载（`callmeju-armv7-linux-gnueabihf`）。
+- **打 `v*.*.*-*` 形式的 tag**：自动发布到 Releases（附 `callmeju` 二进制资产）。
 
-# 3. 在容器内用 just 交叉编译
-podman run --rm -v $PWD:/build -w /build callmeju-env just release
-# 产物：target/armv7-unknown-linux-gnueabihf/release/callmeju
-```
+流程由 `.github/workflows/build.yml` 定义：`docker build` 出 `Containerfile` 环境镜像 → 容器内 `just release` 交叉编译 → 上传产物。
 
-> 任务清单见 `Justfile`；构建镜像见 `Containerfile`；`.cargo/config.toml` 含交叉链接器与 crates.io 镜像(rsproxy)。
+> 任务清单见 `Justfile`；构建镜像见 `Containerfile`；`.cargo/config.toml` 含交叉链接器（`arm-linux-gnueabihf-gcc`）。
 > **glibc 说明**：设备是 glibc 2.26，必须用 ≤ 2.26 的 glibc 链接，故 base 选 Debian stretch（glibc 2.24）。
 
 

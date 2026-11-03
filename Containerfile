@@ -1,5 +1,5 @@
 # 交叉编译环境镜像：Debian stretch (glibc 2.24) + GNU armhf 交叉工具链 + Rust + just
-# 用途：在 Ubuntu PC 上用 podman 构建 callmeju 的 armv7 产物（glibc 2.24 ≤ 设备的 2.26）
+# 用途：GitHub Actions CI 构建 callmeju 的 armv7 产物（glibc 2.24 ≤ 设备的 2.26）
 
 FROM debian:stretch
 
@@ -29,13 +29,6 @@ RUN curl -sSL -o /tmp/just.tgz \
     && rm /tmp/just.tgz
 
 ENV PATH="/root/.cargo/bin:/usr/local/bin:${PATH}"
-
-# 国内构建传 --build-arg USE_RS_PROXY=true 启用 rsproxy 镜像；CI 不传，走 crates.io 直连
-ARG USE_RS_PROXY=false
-RUN if [ "$USE_RS_PROXY" = "true" ]; then \
-        mkdir -p /root/.cargo && \
-        printf '[source.crates-io]\nreplace-with = "rsproxy-sparse"\n\n[source.rsproxy-sparse]\nregistry = "sparse+https://rsproxy.cn/index/"\n' > /root/.cargo/config.toml; \
-    fi
 
 WORKDIR /build
 

@@ -1,5 +1,5 @@
 # callmeju 任务清单
-# 在构建容器内执行：podman run --rm -v $PWD:/build -w /build callmeju-env just <recipe>
+# CI 在构建容器内执行 `just release` 完成 armv7 交叉编译
 
 target := "armv7-unknown-linux-gnueabihf"
 
