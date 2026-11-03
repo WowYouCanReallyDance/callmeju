@@ -1,0 +1,29 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-armv7:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build cross-compile image
+        run: docker build -t callmeju-env -f Containerfile .
+
+      - name: Cross-compile (armv7-linux-gnueabihf)
+        run: docker run --rm -v "${{ github.workspace }}:/build" -w /build callmeju-env just release
+
+      - name: Fix artifact ownership
+        run: sudo chown -R "$(id -u):$(id -g)" target || true
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: callmeju-armv7-linux-gnueabihf
+          path: target/armv7-unknown-linux-gnueabihf/release/callmeju
+          if-no-files-found: error

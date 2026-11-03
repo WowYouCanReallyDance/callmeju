@@ -30,6 +30,13 @@ RUN curl -sSL -o /tmp/just.tgz \
 
 ENV PATH="/root/.cargo/bin:/usr/local/bin:${PATH}"
 
+# 国内构建传 --build-arg USE_RS_PROXY=true 启用 rsproxy 镜像；CI 不传，走 crates.io 直连
+ARG USE_RS_PROXY=false
+RUN if [ "$USE_RS_PROXY" = "true" ]; then \
+        mkdir -p /root/.cargo && \
+        printf '[source.crates-io]\nreplace-with = "rsproxy-sparse"\n\n[source.rsproxy-sparse]\nregistry = "sparse+https://rsproxy.cn/index/"\n' > /root/.cargo/config.toml; \
+    fi
+
 WORKDIR /build
 
 CMD ["just", "release"]
