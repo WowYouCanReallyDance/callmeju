@@ -16,8 +16,8 @@ RUN dpkg --add-architecture armhf \
         libasound2-dev:armhf \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust 工具链 + armv7 目标
-RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal \
+# Rust 工具链 + armv7 目标（固定版本，保证可复现 + 镜像层缓存命中）
+RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.99.1 --profile minimal \
     && /root/.cargo/bin/rustup target add armv7-unknown-linux-gnueabihf
 
 # just（prebuilt musl 静态二进制，免编译）
