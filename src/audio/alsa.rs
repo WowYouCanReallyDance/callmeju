@@ -74,6 +74,9 @@ impl Player for AlsaPlayer {
             }
             written += n * self.channels;
         }
+        // Wait for the buffered audio to finish playing; otherwise the PCM
+        // device is dropped right after and unplayed samples are lost.
+        self.pcm.drain().context("drain playback")?;
         Ok(())
     }
 }

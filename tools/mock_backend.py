@@ -12,7 +12,7 @@ import math
 import struct
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-SAMPLE_RATE = 8000
+SAMPLE_RATE = 16000
 CHANNELS = 2
 PORT = 8000
 
