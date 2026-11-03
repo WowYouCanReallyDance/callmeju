@@ -1,0 +1,23 @@
+# callmeju example configuration. Copy to `callmeju.toml` and adjust.
+
+[server]
+# Backend running ASR -> LLM -> TTS (LAN host or cloud)
+base_url = "http://192.168.1.10:8000"
+converse_path = "/v1/converse"
+timeout_secs = 30
+
+[audio]
+sample_rate = 16000
+channels = 1
+# RK3308 PCM devices: card 1 = rockchip,rk3308-pcm
+capture_device = "hw:1,0"
+playback_device = "hw:1,0"
+
+[vad]
+# Hardware VAD exposed via evdev
+device = "/dev/input/event1"
+max_utterance_secs = 15
+silence_secs = 2
+
+[session]
+beep = true
