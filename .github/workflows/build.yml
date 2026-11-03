@@ -7,15 +7,45 @@ on:
       - 'v*.*.*-*'
   pull_request:
 
+# 同一分支/PR 的新 push 取消旧的进行中 run，避免并发空跑
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 默认最小权限；仅 release job 单独提权写 contents
+permissions:
+  contents: read
+
 jobs:
   build-armv7:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build cross-compile image
-        run: docker build -t callmeju-env -f Containerfile .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build cross-compile image (layer-cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Containerfile
+          load: true
+          tags: callmeju-env:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Cache cargo target (armv7)
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: cargo-armv7-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-armv7-
 
       - name: Cross-compile (armv7-linux-gnueabihf)
         run: docker run --rm -v "${{ github.workspace }}:/build" -w /build callmeju-env just release
