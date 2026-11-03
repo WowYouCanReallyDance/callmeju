@@ -30,8 +30,6 @@ futures-util = "0.3"
 [target.'cfg(target_os = "linux")'.dependencies]
 # ALSA — direct access to pcmC1D0c / pcmC1D0p (27.7M downloads, updated 2026-07)
 alsa = "0.12"
-# Hardware VAD events via evdev (2.26M downloads, v0.13.2 2025-09)
-evdev = "0.13"
 
 [profile.release]
 opt-level = "z"     # minimize binary size for the 46MB-storage / 84MB-RAM device

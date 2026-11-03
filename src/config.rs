@@ -54,9 +54,9 @@ pub struct AudioConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct VadConfig {
-    /// evdev device exposing the hardware VAD, e.g. /dev/input/event1
-    #[serde(default = "default_vad_device")]
-    pub device: String,
+    /// RMS energy threshold that triggers wake detection.
+    #[serde(default = "default_energy_threshold")]
+    pub energy_threshold: f32,
     /// Maximum utterance length in seconds
     #[serde(default = "default_max_utterance_secs")]
     pub max_utterance_secs: u64,
@@ -79,13 +79,13 @@ fn default_timeout_secs() -> u64 {
     30
 }
 fn default_sample_rate() -> u32 {
-    16000
+    8000
 }
 fn default_channels() -> u16 {
-    1
+    2
 }
-fn default_vad_device() -> String {
-    "/dev/input/event1".to_string()
+fn default_energy_threshold() -> f32 {
+    800.0
 }
 fn default_max_utterance_secs() -> u64 {
     15
@@ -131,7 +131,7 @@ impl Default for Config {
                 playback_device: "hw:1,0".to_string(),
             },
             vad: VadConfig {
-                device: default_vad_device(),
+                energy_threshold: default_energy_threshold(),
                 max_utterance_secs: default_max_utterance_secs(),
                 silence_secs: default_silence_secs(),
             },

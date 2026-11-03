@@ -50,13 +50,18 @@ impl Session {
     }
 
     async fn wait_wake(&self) -> Result<()> {
-        let device = self.config.vad.device.clone();
+        let cfg = self.config.clone();
         tokio::task::spawn_blocking(move || {
-            let mut vad = VadListener::open(&device)?;
+            let mut vad = VadListener::open(
+                &cfg.audio.capture_device,
+                cfg.audio.sample_rate,
+                cfg.audio.channels,
+                cfg.vad.energy_threshold,
+            )?;
             vad.wait_wake()
         })
         .await??;
-        tracing::info!("wake word detected");
+        tracing::info!("wake detected");
         Ok(())
     }
 

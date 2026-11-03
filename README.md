@@ -4,7 +4,7 @@
 
 ```
 RK3308 (callmeju)                      后端 (局域网/云)
-  硬件VAD(event1) 唤醒
+  能量检测(VAD) 唤醒
     → ALSA 录音  ────HTTP POST PCM────►  ASR → LLM → TTS
     ← ALSA 播放  ◄────JSON(文本+音频)────
 ```
@@ -18,13 +18,13 @@ RK3308 (callmeju)                      后端 (局域网/云)
 | `main.rs` | 入口：tracing 初始化、配置加载、`tokio::select!` 优雅退出 |
 | `config.rs` | 配置（`clap` CLI + `toml` 文件，`serde(deny_unknown_fields)` 防拼写错误）|
 | `audio/` | `Recorder` / `Player` trait；`alsa`（Linux）与 `mock`（开发用）两套实现 |
-| `vad.rs` | 硬件 VAD（`evdev`，Linux）与 stdin mock（开发用）|
+| `vad.rs` | 能量检测 VAD（软件 RMS，Linux）与 stdin mock（开发用）|
 | `net.rs` | 后端客户端（`reqwest`），POST 原始 PCM、解析 JSON 回复 |
 | `session.rs` | 编排状态机：唤醒 → 录音 → 对话 → 播放 |
 
 关键设计点：
 
-- **阻塞 I/O 放 `spawn_blocking`**：ALSA 读/写与 evdev 等待都是阻塞的，统一丢到 `tokio::task::spawn_blocking`，不阻塞异步运行时。
+- **阻塞 I/O 放 `spawn_blocking`**：ALSA 读/写都是阻塞的，统一丢到 `tokio::task::spawn_blocking`，不阻塞异步运行时。
 - **后端可插拔**：`BackendClient` 只定义一条 wire 契约（`POST /v1/converse`，raw PCM 进、JSON 出），后续换 WebSocket 流式只需新增 transport，不动 session 逻辑。
 - **音频后端按 `cfg(target_os)` 选择**：Linux 用 ALSA（直连 `pcmC1D0c/p`，可控），macOS/其它平台用 mock，保证本机 `cargo check` 也能过。
 - **体积优化**：`opt-level = "z"` + `lto` + `strip` + `panic = "abort"`，面向 46MB 存储 / 84MB 内存的设备。
@@ -44,7 +44,6 @@ RK3308 (callmeju)                      后端 (局域网/云)
 | `futures-util` | 0.3 | Stream 组合器 | 标准 |
 | `base64` | 0.22 | 音频 base64 编解码 | 标准 |
 | `alsa` *(linux)* | 0.12 | 音频 I/O | 27.7M 下载，2026-07 更新 |
-| `evdev` *(linux)* | 0.13 | 硬件 VAD | 2.26M 下载，v0.13.2 稳定 |
 
 备选（未启用）：`cpal`（27M 下载，若需要跨平台音频可替换 `alsa`）。
 
