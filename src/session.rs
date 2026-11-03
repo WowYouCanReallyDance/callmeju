@@ -42,6 +42,10 @@ impl Session {
 
             self.play(&reply.audio_pcm()?).await?;
 
+            // Cooldown after playback so the speaker output isn't picked up
+            // as a new wake (avoids an echo loop).
+            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
             if !reply.continue_conversation {
                 break;
             }
