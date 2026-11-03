@@ -26,7 +26,7 @@ RK3308 (callmeju)                      后端 (局域网/云)
 
 - **阻塞 I/O 放 `spawn_blocking`**：ALSA 读/写都是阻塞的，统一丢到 `tokio::task::spawn_blocking`，不阻塞异步运行时。
 - **后端可插拔**：`BackendClient` 只定义一条 wire 契约（`POST /v1/converse`，raw PCM 进、JSON 出），后续换 WebSocket 流式只需新增 transport，不动 session 逻辑。
-- **音频后端按 `cfg(target_os)` 选择**：Linux 用 ALSA（直连 `pcmC1D0c/p`，可控），macOS/其它平台用 mock，保证本机 `cargo check` 也能过。
+- **音频后端按 `cfg(target_os)` 选择**：Linux 用 ALSA（直连 `pcmC0D0c/p`，即多 codec 麦克风阵列），macOS/其它平台用 mock，保证本机 `cargo check` 也能过。
 - **体积优化**：`opt-level = "z"` + `lto` + `strip` + `panic = "abort"`，面向 46MB 存储 / 84MB 内存的设备。
 
 ## 依赖清单（均已核实 crates.io 活跃度）

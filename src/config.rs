@@ -45,9 +45,9 @@ pub struct AudioConfig {
     pub sample_rate: u32,
     #[serde(default = "default_channels")]
     pub channels: u16,
-    /// ALSA capture device, e.g. "hw:1,0" (pcmC1D0c)
+    /// ALSA capture device, e.g. "hw:0,0" (pcmC0D0c, the multicodec mic array)
     pub capture_device: String,
-    /// ALSA playback device, e.g. "hw:1,0" (pcmC1D0p)
+    /// ALSA playback device, e.g. "hw:0,0" (pcmC0D0p)
     pub playback_device: String,
 }
 
@@ -79,7 +79,7 @@ fn default_timeout_secs() -> u64 {
     30
 }
 fn default_sample_rate() -> u32 {
-    8000
+    16000
 }
 fn default_channels() -> u16 {
     2
@@ -127,8 +127,8 @@ impl Default for Config {
             audio: AudioConfig {
                 sample_rate: default_sample_rate(),
                 channels: default_channels(),
-                capture_device: "hw:1,0".to_string(),
-                playback_device: "hw:1,0".to_string(),
+                capture_device: "hw:0,0".to_string(),
+                playback_device: "hw:0,0".to_string(),
             },
             vad: VadConfig {
                 energy_threshold: default_energy_threshold(),

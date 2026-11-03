@@ -7,16 +7,16 @@ converse_path = "/v1/converse"
 timeout_secs = 30
 
 [audio]
-# RK3308 main PCM (card 1) is fixed 8 kHz / 2 channels, S16_LE
-sample_rate = 8000
+# RK3308 main codec (card 0, dailink-multicodecs): 16 kHz / 2 channels, S16_LE
+sample_rate = 16000
 channels = 2
-capture_device = "hw:1,0"
-playback_device = "hw:1,0"
+capture_device = "hw:0,0"
+playback_device = "hw:0,0"
 
 [vad]
 # Software VAD: wake when sustained RMS energy exceeds this threshold.
 # Tune after deployment by watching the "vad energy" debug log.
-energy_threshold = 800.0
+energy_threshold = 400.0
 max_utterance_secs = 15
 silence_secs = 2
 
